@@ -1,0 +1,15 @@
+{
+    "name": "Highlighter",
+    "version": "1.0",
+    "description": "Highlighter Extension!",
+    "permissions": ["storage"],
+    "content_scripts": [
+        {
+            "matches": ["<all_urls>"],
+            "js": ["content.js"],
+            "css": ["toolbar.css"]
+        }
+    ],
+    "web_accessible_resources": ["toolbar.html"],
+    "manifest_version": 2
+  }
