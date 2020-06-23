@@ -53,7 +53,7 @@ function init() {
         if (!isEmpty(result)) {
             arr = result[URL]
             var found = window.find(arr.pop())
-            if(!found) highlighting = false
+            if(!found || arr.length <= 0) highlighting = false
         }
     });
 
@@ -63,6 +63,9 @@ document.onselectionchange = () => {
 
     var selection = window.getSelection().getRangeAt(0).cloneRange();
     var rect = selection.getClientRects();
+
+    console.log('highlighting', highlighting, arr.length, arr)
+
     if (highlighting) {
         var selectedText = selection.extractContents();
         var span = document.createElement("span");
@@ -70,19 +73,25 @@ document.onselectionchange = () => {
         span.appendChild(selectedText);
         selection.insertNode(span);
         if (arr.length > 0) {
-            window.find(arr.pop())
+            var found = false;
+            do{
+                
+                found = window.find(arr.pop(), false, false, true)
+                console.log('looping', found, arr.length)
+            }while(found != true && arr.length > 0)
+            
         } else {
             highlighting = false;
         }
 
     } else {
         if (rect.item(0) != null) {
-            popup.style.cssText = `position:absolute; top: ${rect.item(0).top}px; left: ${rect.item(0).left}px;`
+            popup.style.cssText = `position:fixed; top: ${rect.item(0).top - 50}px; left: ${rect.item(0).left}px;`
             popup.style.display = "block"
         }
-
+        
         if (selection.toString().length <= 0) {
-            console.log('')
+            console.log('nothing selected')
             popup.style.display = "none"
         }
     }
