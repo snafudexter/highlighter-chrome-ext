@@ -75,6 +75,8 @@ document.onselectionchange = () => {
             
         } else {
             highlighting = false;
+            window.getSelection().empty()
+            console.log('last')
         }
 
     } else {
