@@ -5,7 +5,6 @@ var popup = null
 var arr = []
 
 function init() {
-    console.log('init')
     var xhr = new XMLHttpRequest();
     xhr.onreadystatechange = function () {
         if (xhr.readyState == 4) {
@@ -16,7 +15,6 @@ function init() {
                 document.body.appendChild(popup)
                 document.getElementById("btn_dostuff").onclick = () => {
                     var selection = window.getSelection().getRangeAt(0).cloneRange();
-
                     chrome.storage.local.get([URL], function (result) {
                         if (isEmpty(result)) {
                             var arr = [];
@@ -63,9 +61,6 @@ document.onselectionchange = () => {
 
     var selection = window.getSelection().getRangeAt(0).cloneRange();
     var rect = selection.getClientRects();
-
-    console.log('highlighting', highlighting, arr.length, arr)
-
     if (highlighting) {
         var selectedText = selection.extractContents();
         var span = document.createElement("span");
@@ -75,10 +70,8 @@ document.onselectionchange = () => {
         if (arr.length > 0) {
             var found = false;
             do{
-                
                 found = window.find(arr.pop(), false, false, true)
-                console.log('looping', found, arr.length)
-            }while(found != true && arr.length > 0)
+            }while(!found && arr.length > 0)
             
         } else {
             highlighting = false;
@@ -91,7 +84,6 @@ document.onselectionchange = () => {
         }
         
         if (selection.toString().length <= 0) {
-            console.log('nothing selected')
             popup.style.display = "none"
         }
     }
