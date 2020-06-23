@@ -50,7 +50,7 @@ function init() {
     chrome.storage.local.get([URL], function (result) {
         if (!isEmpty(result)) {
             arr = result[URL]
-            var found = window.find(arr.pop())
+            var found = window.find(arr.pop(), false, false, true)
             if(!found || arr.length <= 0) highlighting = false
         }
     });
@@ -76,7 +76,6 @@ document.onselectionchange = () => {
         } else {
             highlighting = false;
             window.getSelection().empty()
-            console.log('last')
         }
 
     } else {
