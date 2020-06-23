@@ -84,6 +84,7 @@ document.onselectionchange = () => {
 }
 
 function highlightSelection() {
+    var selection = window.getSelection().getRangeAt(0).cloneRange();
     var selectedText = selection.extractContents();
     var span = document.createElement("span");
     span.style.backgroundColor = "yellow";
