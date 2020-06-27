@@ -6,7 +6,7 @@
     "content_scripts": [
         {
             "matches": ["<all_urls>"],
-            "js": ["content.js"],
+            "js": ["rangy-core.js","rangy-classapplier.js", "rangy-highlighter.js","content.js"],
             "css": ["toolbar.css"]
         }
     ],

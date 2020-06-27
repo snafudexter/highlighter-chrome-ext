@@ -34,3 +34,7 @@
     visibility: visible;
     opacity: 1;
   }
+
+  .highlight {
+    background-color: yellow;
+}

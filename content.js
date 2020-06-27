@@ -1,10 +1,23 @@
 const URL = window.location.href
-var highlighting = true;
+var highlighting = false;
 var path_ = chrome.extension.getURL('toolbar.html')
 var popup = null
 var arr = []
 
+let highlighter;
+
 function init() {
+
+    rangy.init();
+
+    highlighter = rangy.createHighlighter();
+
+    highlighter.addClassApplier(rangy.createClassApplier("highlight", {
+        ignoreWhiteSpace: true,
+        tagNames: ["span", "a"]
+    }));
+
+
     var xhr = new XMLHttpRequest();
     xhr.onreadystatechange = function () {
         if (xhr.readyState == 4) {
@@ -14,38 +27,27 @@ function init() {
                 popup.innerHTML = xhr.responseText
                 document.body.appendChild(popup)
                 document.getElementById("btn_dostuff").onclick = () => {
-                    var selection = window.getSelection().getRangeAt(0).cloneRange();
-                    chrome.storage.local.get([URL], function (result) {
-                        if (isEmpty(result)) {
-                            var arr = [];
-                            arr.push(selection.toString())
-                            chrome.storage.local.set({
-                                [URL]: arr
-                            }, () => {
-                                console.log('saved')
-                            })
-                        } else {
-                            var arr = result[URL]
-                            arr.push(selection.toString())
-                            chrome.storage.local.set({
-                                [URL]: arr
-                            }, () => {
-                                console.log('saved')
-                            })
-                        }
-                        highlightSelection()
-                        window.getSelection().empty()
-                        popup.style.display = "none"
-                    });
+
+                    highlightSelectedText()
+
+                    var data = highlighter.serialize()
+                    chrome.storage.local.set({
+                        [URL]: data
+                    }, () => {
+                        console.log('saved', data)
+                    })
+
                 }
-                console.log('high', highlighting)
                 chrome.storage.local.get([URL], function (result) {
                     if (!isEmpty(result)) {
-                        arr = result[URL]
-                        const len = arr.length;
-                        var found = window.find(arr.pop(), false, false, true)
-                        if (!found || len <= 0) {
-                            highlighting = false
+
+                        let data = result[URL]
+                        try {
+
+                           highlighter.deserialize(data)
+
+                        } catch (err) {
+                            chrome.storage.local.clear()
                         }
                     }
                 });
@@ -62,28 +64,13 @@ document.onselectionchange = () => {
         if (window.getSelection().rangeCount > 0) {
             var selection = window.getSelection().getRangeAt(0).cloneRange();
             var rect = selection.getClientRects();
-            if (highlighting) {
-                highlightSelection()
-                if (arr.length > 0) {
-                    var found = false;
-                    do {
-                        found = window.find(arr.pop(), false, false, true)
-                    } while (!found && arr.length > 0)
+            if (rect.item(0) != null) {
+                popup.style.cssText = `position:fixed; top: ${rect.item(0).top - 50}px; left: ${rect.item(0).left}px;`
+                popup.style.display = "block"
+            }
 
-                } else {
-                    highlighting = false;
-                    window.getSelection().empty()
-                }
-
-            } else {
-                if (rect.item(0) != null) {
-                    popup.style.cssText = `position:fixed; top: ${rect.item(0).top - 50}px; left: ${rect.item(0).left}px;`
-                    popup.style.display = "block"
-                }
-
-                if (selection.toString().length <= 0) {
-                    popup.style.display = "none"
-                }
+            if (selection.toString().length <= 0) {
+                popup.style.display = "none"
             }
         }
 
@@ -93,18 +80,17 @@ document.onselectionchange = () => {
     }
 }
 
-function highlightSelection() {
-    var selection = window.getSelection().getRangeAt(0).cloneRange();
-    var selectedText = selection.extractContents();
-    var span = document.createElement("span");
-    span.style.backgroundColor = "yellow";
-    span.appendChild(selectedText);
-    selection.insertNode(span);
-}
-
 function isEmpty(obj) {
     return (Object.keys(obj).length === 0 && obj.constructor === Object)
 }
 
 
 window.onload = init;
+
+function highlightSelectedText() {
+    highlighter.highlightSelection("highlight");
+}
+
+function removeHighlightFromSelectedText() {
+    highlighter.unhighlightSelection();
+}
